@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowDown } from "lucide-react"
+import VideoModal from "./VideoModal"
 
 const ROLES = [
   "Développeur Full Stack",
   "Expert Gestion de Projet IT",
-  "Auditeur Sécurité SI",
-  "Consultant Digital",
+  "Ex-Auditeur Sécurité SI",
+  "Ex-Consultant",
 ]
 
 function GithubIcon({ size = 20 }: { size?: number }) {
@@ -28,8 +29,8 @@ function LinkedinIcon({ size = 20 }: { size?: number }) {
 }
 
 const SOCIALS = [
-  { href: "#", Icon: GithubIcon,   label: "GitHub" },
-  { href: "#", Icon: LinkedinIcon, label: "LinkedIn" },
+  { href: "https://github.com/Cdric387",          Icon: GithubIcon,   label: "GitHub" },
+  { href: "https://www.linkedin.com/in/cedricpascal4", Icon: LinkedinIcon, label: "LinkedIn" },
 ]
 
 export default function Hero() {
@@ -65,8 +66,7 @@ export default function Hero() {
           left: "-5%",
           width: "700px",
           height: "700px",
-          background:
-            "radial-gradient(circle, rgba(129,140,248,0.13) 0%, transparent 65%)",
+          background: "radial-gradient(circle, rgba(129,140,248,0.13) 0%, transparent 65%)",
           filter: "blur(60px)",
           pointerEvents: "none",
         }}
@@ -79,8 +79,7 @@ export default function Hero() {
           right: "-5%",
           width: "500px",
           height: "500px",
-          background:
-            "radial-gradient(circle, rgba(52,211,153,0.07) 0%, transparent 65%)",
+          background: "radial-gradient(circle, rgba(52,211,153,0.07) 0%, transparent 65%)",
           filter: "blur(60px)",
           pointerEvents: "none",
         }}
@@ -126,7 +125,7 @@ export default function Hero() {
             }}
           />
           <span style={{ fontSize: "13px", color: "var(--emerald)", fontWeight: 500 }}>
-            Disponible — Septembre 2026
+            Disponible — Juin / Juillet 2026
           </span>
         </motion.div>
 
@@ -145,8 +144,7 @@ export default function Hero() {
           Cédric{" "}
           <span
             style={{
-              background:
-                "linear-gradient(135deg, #818cf8 20%, #a78bfa 50%, #c084fc 80%)",
+              background: "linear-gradient(135deg, #818cf8 20%, #a78bfa 50%, #c084fc 80%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -196,8 +194,8 @@ export default function Hero() {
             lineHeight: 1.75,
           }}
         >
-          Étudiant en Master MIAGE, passionné par la création d'applications
-          web modernes alliant performance technique et impact métier.
+          Développeur en reconversion (ENI - Bac+5) après +10 ans en gestion de projet et audit SI.
+
         </p>
 
         {/* CTA Row */}
@@ -254,15 +252,14 @@ export default function Hero() {
               fontSize: "15px",
               transition: "background 0.2s",
             }}
-            onMouseEnter={e =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.09)")
-            }
-            onMouseLeave={e =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
-            }
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.09)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
           >
             Me contacter
           </a>
+
+          {/* ← Bouton vidéo avec question secrète */}
+          <VideoModal src="/presentation.mp4" label="Construction de ce portfolio" />
 
           {/* Social icons */}
           <div style={{ display: "flex", gap: "8px", marginLeft: "4px" }}>

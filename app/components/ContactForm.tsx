@@ -93,8 +93,7 @@ export default function ContactForm() {
             <span style={{ color: "var(--accent)" }}>ensemble</span>
           </h2>
           <p style={{ color: "var(--muted)", fontSize: "16px", lineHeight: 1.6 }}>
-            Disponible pour un stage dès septembre 2026. N'hésitez pas à me
-            contacter pour discuter de vos projets.
+            Je recherche un stage de 2 mois (juin–juillet 2026), suivi d’une alternance de deux ans à partir de septembre 2026 afin de contribuer au développement d’applications au sein d’une équipe technique.
           </p>
         </motion.div>
 

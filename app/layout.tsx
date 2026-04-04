@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import { Syne, DM_Sans } from "next/font/google"
 import "./globals.css"
 import Navbar from "./components/Navbar"
+import ScrollProgress from "./components/ScrollProgress"
+import { ThemeProvider } from "./context/ThemeContext"
 
 const syne = Syne({
   subsets: ["latin"],
@@ -18,20 +20,18 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "Cédric Pascal — Portfolio",
-  description:
-    "Consultant IT & Développeur Full Stack.",
+  description: "Développeur Full Stack & ex-Consultant IT.",
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={`${syne.variable} ${dmSans.variable}`}>
       <body>
-        <Navbar />
-        <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+        <ThemeProvider>
+          <ScrollProgress />
+          <Navbar />
+          <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ExternalLink, X } from "lucide-react"
+import { ExternalLink, ArrowRight, X } from "lucide-react"
+import Link from "next/link"
 
 interface Project {
   id: string
@@ -15,18 +16,12 @@ interface Project {
 
 const CATEGORIES = ["Tous", "Web", "Mobile", "Data", "DevOps"]
 
-function CategoryFilter({
-  active,
-  onChange,
-}: {
-  active: string
-  onChange: (c: string) => void
-}) {
+function CategoryFilter({ active, onChange }: { active: string; onChange: (c: string) => void }) {
   return (
     <div style={{
       display: "flex",
       gap: "4px",
-      background: "rgba(255,255,255,0.03)",
+      background: "var(--bg-card)",
       border: "1px solid var(--border)",
       borderRadius: "14px",
       padding: "4px",
@@ -56,15 +51,7 @@ function CategoryFilter({
   )
 }
 
-function ProjectCard({
-  project,
-  index,
-  onClick,
-}: {
-  project: Project
-  index: number
-  onClick: () => void
-}) {
+function ProjectCard({ project, index, onClick }: { project: Project; index: number; onClick: () => void }) {
   return (
     <motion.article
       layout
@@ -72,7 +59,7 @@ function ProjectCard({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.28, delay: index * 0.05 }}
-      whileHover={{ y: -4, borderColor: "rgba(129,140,248,0.35)" }}
+      whileHover={{ y: -4, borderColor: "rgba(129,140,248,0.35)" } as object}
       onClick={onClick}
       style={{
         padding: "28px",
@@ -133,18 +120,15 @@ function ProjectCard({
       {project.tags && project.tags.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
           {project.tags.slice(0, 5).map(tag => (
-            <span
-              key={tag}
-              style={{
-                fontSize: "11px",
-                padding: "3px 10px",
-                borderRadius: "100px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "#a1a1aa",
-                letterSpacing: "0.02em",
-              }}
-            >
+            <span key={tag} style={{
+              fontSize: "11px",
+              padding: "3px 10px",
+              borderRadius: "100px",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "#a1a1aa",
+              letterSpacing: "0.02em",
+            }}>
               {tag}
             </span>
           ))}
@@ -154,16 +138,9 @@ function ProjectCard({
   )
 }
 
-function ProjectModal({
-  project,
-  onClose,
-}: {
-  project: Project
-  onClose: () => void
-}) {
+function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
   return (
     <>
-      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -179,7 +156,6 @@ function ProjectModal({
         }}
       />
 
-      {/* Panel */}
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 24 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -191,8 +167,8 @@ function ProjectModal({
           left: "50%",
           transform: "translate(-50%, -50%)",
           width: "min(640px, calc(100vw - 40px))",
-          background: "#111113",
-          border: "1px solid rgba(255,255,255,0.1)",
+          background: "var(--bg)",
+          border: "1px solid var(--border)",
           borderRadius: "24px",
           padding: "44px",
           zIndex: 101,
@@ -207,8 +183,8 @@ function ProjectModal({
             position: "absolute",
             top: "18px",
             right: "18px",
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
             borderRadius: "50%",
             width: "36px",
             height: "36px",
@@ -254,7 +230,7 @@ function ProjectModal({
         </h2>
 
         <p style={{
-          color: "#a1a1aa",
+          color: "var(--muted)",
           lineHeight: 1.75,
           marginBottom: "28px",
           fontSize: "15px",
@@ -265,48 +241,78 @@ function ProjectModal({
         {project.tags && project.tags.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "36px" }}>
             {project.tags.map(tag => (
-              <span
-                key={tag}
-                style={{
-                  fontSize: "12px",
-                  padding: "4px 12px",
-                  borderRadius: "100px",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "#a1a1aa",
-                }}
-              >
+              <span key={tag} style={{
+                fontSize: "12px",
+                padding: "4px 12px",
+                borderRadius: "100px",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border)",
+                color: "var(--muted)",
+              }}>
                 {tag}
               </span>
             ))}
           </div>
         )}
 
-        {project.url && (
-          <a
-            href={project.url}
-            target="_blank"
-            rel="noopener noreferrer"
+        {/* Action buttons */}
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          {project.url && (
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "var(--accent)",
+                color: "#fff",
+                textDecoration: "none",
+                padding: "12px 24px",
+                borderRadius: "100px",
+                fontWeight: 600,
+                fontSize: "14px",
+                transition: "opacity 0.2s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+            >
+              Voir le projet
+              <ExternalLink size={14} />
+            </a>
+          )}
+
+          {/* Link to full detail page */}
+          <Link
+            href={`/projects/${project.id}`}
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              background: "var(--accent)",
-              color: "#fff",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border)",
+              color: "var(--text)",
               textDecoration: "none",
               padding: "12px 24px",
               borderRadius: "100px",
-              fontWeight: 600,
+              fontWeight: 500,
               fontSize: "14px",
-              transition: "opacity 0.2s",
+              transition: "background 0.2s, border-color 0.2s",
             }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "var(--accent-glow)"
+              e.currentTarget.style.borderColor = "var(--accent)"
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "var(--bg-card)"
+              e.currentTarget.style.borderColor = "var(--border)"
+            }}
           >
-            Voir le projet
-            <ExternalLink size={14} />
-          </a>
-        )}
+            Page détail
+            <ArrowRight size={14} />
+          </Link>
+        </div>
       </motion.div>
     </>
   )
@@ -316,10 +322,7 @@ export default function ProjectsSection({ projects }: { projects: Project[] }) {
   const [filter, setFilter] = useState("Tous")
   const [selected, setSelected] = useState<Project | null>(null)
 
-  const filtered =
-    filter === "Tous"
-      ? projects
-      : projects.filter(p => p.category === filter)
+  const filtered = filter === "Tous" ? projects : projects.filter(p => p.category === filter)
 
   return (
     <section id="projects" style={{ padding: "120px 24px" }}>
@@ -361,27 +364,23 @@ export default function ProjectsSection({ projects }: { projects: Project[] }) {
               Mes <span style={{ color: "var(--accent)" }}>Projets</span>
             </h2>
           </div>
-
           <CategoryFilter active={filter} onChange={setFilter} />
         </motion.div>
 
         {/* Grid */}
         <AnimatePresence mode="popLayout">
-          <motion.div
-            layout
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: "14px",
-            }}
-          >
+          <motion.div layout style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: "14px",
+          }}>
             {filtered.length === 0 && (
               <motion.p
                 key="empty"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 style={{
-                  color: "#3f3f46",
+                  color: "var(--border)",
                   gridColumn: "1 / -1",
                   textAlign: "center",
                   padding: "80px 0",
@@ -391,7 +390,6 @@ export default function ProjectsSection({ projects }: { projects: Project[] }) {
                 Aucun projet dans cette catégorie pour l'instant.
               </motion.p>
             )}
-
             {filtered.map((project, i) => (
               <ProjectCard
                 key={project.id}

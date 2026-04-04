@@ -1,24 +1,27 @@
-// app/components/Navbar.tsx
 "use client"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Download } from "lucide-react"
+import { Download, Moon, Sun } from "lucide-react"
+import { useTheme } from "../context/ThemeContext"
 
 const NAV_LINKS = [
-  { label: "Compétences", href: "#skills" },
-  { label: "Projets",     href: "#projects" },
-  { label: "Contact",     href: "#contact" },
+  { label: "Compétences", href: "/#skills" },
+  { label: "Projets",     href: "/#projects" },
+  { label: "Contact",     href: "/#contact" },
 ]
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const { theme, toggle } = useTheme()
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 30)
     window.addEventListener("scroll", handler, { passive: true })
     return () => window.removeEventListener("scroll", handler)
   }, [])
+
+  const isDark = theme === "dark"
 
   return (
     <header
@@ -40,10 +43,12 @@ export default function Navbar() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: scrolled ? "rgba(9, 9, 11, 0.85)" : "transparent",
+          background: scrolled
+            ? isDark ? "rgba(9, 9, 11, 0.85)" : "rgba(250, 250, 250, 0.85)"
+            : "transparent",
           backdropFilter: scrolled ? "blur(20px)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(20px)" : "none",
-          border: scrolled ? "1px solid rgba(255,255,255,0.08)" : "none",
+          border: scrolled ? "1px solid var(--border)" : "none",
           borderRadius: "100px",
           padding: scrolled ? "10px 20px 10px 24px" : "0",
           transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -65,7 +70,7 @@ export default function Navbar() {
           CP<span style={{ color: "var(--accent)" }}>.</span>
         </Link>
 
-        {/* Links */}
+        {/* Right side */}
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           {NAV_LINKS.map(({ label, href }) => (
             <a
@@ -81,7 +86,9 @@ export default function Navbar() {
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.color = "var(--text)"
-                e.currentTarget.style.background = "rgba(255,255,255,0.06)"
+                e.currentTarget.style.background = isDark
+                  ? "rgba(255,255,255,0.06)"
+                  : "rgba(0,0,0,0.05)"
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.color = "var(--muted)"
@@ -92,6 +99,39 @@ export default function Navbar() {
             </a>
           ))}
 
+          {/* Theme toggle */}
+          <button
+            onClick={toggle}
+            aria-label="Changer de thème"
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              border: "1px solid var(--border)",
+              background: "transparent",
+              color: "var(--muted)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "color 0.2s, border-color 0.2s, background 0.2s",
+              marginLeft: "4px",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = "var(--text)"
+              e.currentTarget.style.borderColor = "var(--accent)"
+              e.currentTarget.style.background = "var(--accent-glow)"
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = "var(--muted)"
+              e.currentTarget.style.borderColor = "var(--border)"
+              e.currentTarget.style.background = "transparent"
+            }}
+          >
+            {isDark ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+
+          {/* CV download */}
           <a
             href="/cv.pdf"
             download
@@ -99,7 +139,7 @@ export default function Navbar() {
               display: "inline-flex",
               alignItems: "center",
               gap: "6px",
-              marginLeft: "8px",
+              marginLeft: "4px",
               background: "var(--accent)",
               color: "#fff",
               textDecoration: "none",
