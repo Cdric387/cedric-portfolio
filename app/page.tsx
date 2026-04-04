@@ -1,11 +1,16 @@
 import { supabase } from "@/lib/supabase"
-import { ContactForm } from "./components/ContactForm"
+import Hero from "./components/Hero"
+import Skills from "./components/Skills"
+import ProjectsSection from "./components/ProjectsSection"
+import ContactForm from "./components/ContactForm"
 
 async function getProjects() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("projects")
     .select("*")
+    .order("created_at", { ascending: false })
 
+  if (error) console.error("Supabase error:", error.message)
   return data ?? []
 }
 
@@ -13,24 +18,29 @@ export default async function Home() {
   const projects = await getProjects()
 
   return (
-    <main className="min-h-screen bg-zinc-50 text-zinc-900 p-12">
-      <h1 className="text-4xl font-bold mb-12">Cédric — Portfolio</h1>
-
-      <h2 className="text-2xl font-semibold mb-6">Projets</h2>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {projects.map((project: any) => (
-          <div key={project.id} className="p-6 border rounded-lg bg-white">
-            <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
-            <p className="text-zinc-600 mb-3">{project.description}</p>
-            <a href={project.url} className="text-blue-600">
-              Voir le projet
-            </a>
-          </div>
-        ))}
-      </div>
-
+    <main>
+      <Hero />
+      <Skills />
+      <ProjectsSection projects={projects} />
       <ContactForm />
+
+      {/* Footer */}
+      <footer
+        style={{
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          padding: "32px 24px",
+          textAlign: "center",
+          color: "var(--muted)",
+          fontSize: "13px",
+        }}
+      >
+        <p>
+          © {new Date().getFullYear()} Cédric Pascal — Conçu & développé avec{" "}
+          <span style={{ color: "var(--accent)" }}>Next.js</span>,{" "}
+          <span style={{ color: "var(--accent)" }}>Supabase</span> &{" "}
+          <span style={{ color: "var(--accent)" }}>Vercel</span>
+        </p>
+      </footer>
     </main>
   )
 }

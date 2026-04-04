@@ -43,18 +43,20 @@ The content is organized as follows:
 .gitignore
 AGENTS.md
 app/about/page.tsx
+app/components/ContactForm.tsx
 app/components/Hero.tsx
 app/components/Navbar.tsx
+app/components/ProjectsSection
 app/components/Skills.tsx
 app/favicon.ico
 app/globals.css
 app/layout.tsx
-app/lib/supabase.ts
 app/page.tsx
 app/projects/[id]/page.tsx
 app/projects/page.tsx
 CLAUDE.md
 eslint.config.mjs
+lib/supabase.ts
 next.config.ts
 package.json
 portfolio-cedric/.gitignore
@@ -76,6 +78,7 @@ portfolio-cedric/public/window.svg
 portfolio-cedric/README.md
 portfolio-cedric/tsconfig.json
 postcss.config.mjs
+public/cv.pdf
 public/file.svg
 public/globe.svg
 public/next.svg
@@ -88,212 +91,421 @@ tsconfig.json
 <files>
 This section contains the contents of the repository's files.
 
-<file path="app/about/page.tsx">
-// app/about/page.tsx
-export default function About() {
-  return (
-    <main className="p-10 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">À propos de moi</h1>
-      <p>
-        Je suis Cédric, consultant IT passionné par le développement web et l'exploration de nouvelles technologies.
-        J'aime créer des applications complètes en Next.js et React, avec un focus sur la qualité et la performance.
-      </p>
-    </main>
-  );
-}
-</file>
+<file path="app/components/ProjectsSection">
+"use client"
 
-<file path="app/components/Hero.tsx">
-"use client";
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { ExternalLink, X } from "lucide-react"
 
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Github, Linkedin } from "lucide-react";
-import { useState, useEffect } from "react";
-
-export default function Hero() {
-  const [activeTitleIndex, setActiveTitleIndex] = useState(0);
-  const titles = ["Développeur Full Stack", "Expert Gestion de Projet IT", "Auditeur Sécurité SI"];
-
-  useEffect(() => {
-    const timer = setInterval(() => setActiveTitleIndex((prev) => (prev + 1) % titles.length), 3000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <section className="relative h-screen flex flex-col justify-center items-center px-6 overflow-hidden">
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px]" />
-
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center z-10">
-        <h2 className="text-purple-500 font-medium tracking-widest uppercase mb-4 text-sm">Disponible Septembre 2026</h2>
-        <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tighter">
-          Cédric <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Pascal</span>
-        </h1>
-        <div className="h-12 text-2xl md:text-3xl font-light text-zinc-400">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={activeTitleIndex}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.5 }}
-            >
-              {titles[activeTitleIndex]}
-            </motion.span>
-          </AnimatePresence>
-        </div>
-
-        <div className="flex gap-6 mt-12 justify-center">
-          <button
-            onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-medium transition-all flex items-center gap-2 group"
-          >
-            Voir mes travaux
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-          <div className="flex gap-4 items-center">
-            <a href="#" className="p-2 text-zinc-400 hover:text-white transition-colors"><Github className="w-6 h-6" /></a>
-            <a href="#" className="p-2 text-zinc-400 hover:text-white transition-colors"><Linkedin className="w-6 h-6" /></a>
-          </div>
-        </div>
-      </motion.div>
-
-      <div className="absolute bottom-10 animate-bounce text-zinc-600">
-        <div className="w-px h-12 bg-gradient-to-b from-purple-500 to-transparent" />
-      </div>
-    </section>
-  );
-}
-</file>
-
-<file path="app/components/Navbar.tsx">
-// app/components/Navbar.tsx
-import Link from "next/link";
-
-export default function Navbar() {
-  return (
-    <nav className="flex gap-6 p-4 bg-gray-100 dark:bg-gray-900">
-      <Link href="/">Home</Link>
-      <Link href="/projects">Projets</Link>
-      <Link href="/about">À propos</Link>
-    </nav>
-  );
-}
-</file>
-
-<file path="app/components/Skills.tsx">
-"use client";
-import { motion } from "framer-motion";
-import { Cpu, Code2, Smartphone, Briefcase, ShieldCheck, Database } from "lucide-react";
-
-interface Skill {
-  name: string;
-  level: number;
-  icon: any;
-  category: string;
+interface Project {
+  id: string
+  title: string
+  description: string
+  url?: string
+  tags?: string[]
+  category?: string
 }
 
-const SKILLS: Skill[] = [
-  { name: 'Java / Spring Boot', level: 66, icon: Cpu, category: 'Tech' },
-  { name: 'JavaScript / React', level: 50, icon: Code2, category: 'Tech' },
-  { name: 'Next.js / Tailwind', level: 45, icon: Smartphone, category: 'Tech' },
-  { name: 'Gestion de Projet IT', level: 95, icon: Briefcase, category: 'Management' },
-  { name: 'Audit & Gouvernance SI', level: 90, icon: ShieldCheck, category: 'Security' },
-  { name: 'SQL / Supabase', level: 60, icon: Database, category: 'Tech' },
-];
+const CATEGORIES = ["Tous", "Web", "Mobile", "Data", "DevOps"]
 
-export default function Skills() {
+function CategoryFilter({
+  active,
+  onChange,
+}: {
+  active: string
+  onChange: (c: string) => void
+}) {
   return (
-    <section className="py-24 bg-zinc-900/30">
-      <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-4xl font-bold mb-16 text-center">Compétences & <span className="text-purple-400">Maîtrise</span></h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {SKILLS.map(skill => (
-            <div key={skill.name} className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 hover:border-purple-500/50 transition-colors group">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 rounded-lg bg-purple-500/10 text-purple-400 group-hover:scale-110 transition-transform">
-                  <skill.icon className="w-6 h-6" />
-                </div>
-                <span className="font-semibold">{skill.name}</span>
-              </div>
-              <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-                <motion.div initial={{ width: 0 }} whileInView={{ width: `${skill.level}%` }} transition={{ duration: 1, ease: "easeOut" }} className="h-full bg-gradient-to-r from-purple-500 to-blue-500" />
-              </div>
-              <div className="mt-2 text-right text-xs text-zinc-500 font-mono">{skill.level}%</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-</file>
-
-<file path="app/lib/supabase.ts">
-"use client";
-import { createClient } from '@supabase/supabase-js';
-
-// On récupère les clés depuis le fichier .env.local de manière sécurisée
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-// Création et exportation du client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-</file>
-
-<file path="app/projects/[id]/page.tsx">
-import { supabase } from "@/lib/supabase"
-
-export default async function ProjectPage({params}:{params:{id:string}}){
-
-  const { data } = await supabase
-    .from("projects")
-    .select("*")
-    .eq("id",params.id)
-    .single()
-
-  return (
-
-    <main className="p-20">
-
-      <h1 className="text-4xl font-bold mb-6">
-        {data.title}
-      </h1>
-
-      <p>
-        {data.description}
-      </p>
-
-      <a
-        href={data.url}
-        className="text-blue-600"
-      >
-        Voir le projet
-      </a>
-
-    </main>
-
+    <div style={{
+      display: "flex",
+      gap: "4px",
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid var(--border)",
+      borderRadius: "14px",
+      padding: "4px",
+      flexWrap: "wrap",
+    }}>
+      {CATEGORIES.map(cat => (
+        <button
+          key={cat}
+          onClick={() => onChange(cat)}
+          style={{
+            padding: "8px 18px",
+            borderRadius: "10px",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "13px",
+            fontWeight: 500,
+            transition: "all 0.2s",
+            background: active === cat ? "var(--accent)" : "transparent",
+            color: active === cat ? "#fff" : "var(--muted)",
+            fontFamily: "inherit",
+          }}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
   )
 }
-</file>
 
-<file path="app/projects/page.tsx">
-// app/projects/page.tsx
-import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-
-export default async function ProjectsPage() {
-  const { data: projects } = await supabase.from("projects").select("*");
+function ProjectCard({
+  project,
+  index,
+  onClick,
+}: {
+  project: Project
+  index: number
+  onClick: () => void
+}) {
   return (
-    <main className="p-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-      {projects?.map((project) => (
-        <Link key={project.id} href={`/projects/${project.id}`} className="border p-4 rounded hover:shadow-lg">
-          <h2 className="text-xl font-bold">{project.title}</h2>
-          <p className="text-gray-600">{project.description}</p>
-        </Link>
-      ))}
-    </main>
-  );
+    <motion.article
+      layout
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.28, delay: index * 0.05 }}
+      whileHover={{ y: -4, borderColor: "rgba(129,140,248,0.35)" }}
+      onClick={onClick}
+      style={{
+        padding: "28px",
+        borderRadius: "18px",
+        background: "var(--bg-card)",
+        border: "1px solid var(--border)",
+        cursor: "pointer",
+        transition: "border-color 0.2s, background 0.2s",
+        display: "flex",
+        flexDirection: "column",
+        gap: "0",
+      }}
+    >
+      {project.category && (
+        <span style={{
+          display: "inline-block",
+          alignSelf: "flex-start",
+          fontSize: "11px",
+          padding: "3px 10px",
+          borderRadius: "100px",
+          background: "rgba(129,140,248,0.1)",
+          color: "var(--accent)",
+          border: "1px solid rgba(129,140,248,0.2)",
+          marginBottom: "16px",
+          fontWeight: 500,
+          letterSpacing: "0.02em",
+        }}>
+          {project.category}
+        </span>
+      )}
+
+      <h3 style={{
+        fontFamily: "var(--font-display)",
+        fontSize: "19px",
+        fontWeight: 700,
+        color: "var(--text)",
+        marginBottom: "10px",
+        letterSpacing: "-0.02em",
+        lineHeight: 1.2,
+      }}>
+        {project.title}
+      </h3>
+
+      <p style={{
+        color: "var(--muted)",
+        fontSize: "14px",
+        lineHeight: 1.65,
+        marginBottom: "20px",
+        flexGrow: 1,
+        display: "-webkit-box",
+        WebkitLineClamp: 3,
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden",
+      }}>
+        {project.description}
+      </p>
+
+      {project.tags && project.tags.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+          {project.tags.slice(0, 5).map(tag => (
+            <span
+              key={tag}
+              style={{
+                fontSize: "11px",
+                padding: "3px 10px",
+                borderRadius: "100px",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "#a1a1aa",
+                letterSpacing: "0.02em",
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </motion.article>
+  )
+}
+
+function ProjectModal({
+  project,
+  onClose,
+}: {
+  project: Project
+  onClose: () => void
+}) {
+  return (
+    <>
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.75)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          zIndex: 100,
+        }}
+      />
+
+      {/* Panel */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 24 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.94, y: 24 }}
+        transition={{ type: "spring", damping: 28, stiffness: 380 }}
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "min(640px, calc(100vw - 40px))",
+          background: "#111113",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: "24px",
+          padding: "44px",
+          zIndex: 101,
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "18px",
+            right: "18px",
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "50%",
+            width: "36px",
+            height: "36px",
+            cursor: "pointer",
+            color: "var(--muted)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "color 0.2s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = "var(--text)")}
+          onMouseLeave={e => (e.currentTarget.style.color = "var(--muted)")}
+        >
+          <X size={16} />
+        </button>
+
+        {project.category && (
+          <span style={{
+            display: "inline-block",
+            fontSize: "11px",
+            padding: "3px 10px",
+            borderRadius: "100px",
+            background: "rgba(129,140,248,0.1)",
+            color: "var(--accent)",
+            border: "1px solid rgba(129,140,248,0.2)",
+            marginBottom: "20px",
+            fontWeight: 500,
+          }}>
+            {project.category}
+          </span>
+        )}
+
+        <h2 style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "30px",
+          fontWeight: 800,
+          color: "var(--text)",
+          letterSpacing: "-0.03em",
+          marginBottom: "16px",
+          lineHeight: 1.1,
+        }}>
+          {project.title}
+        </h2>
+
+        <p style={{
+          color: "#a1a1aa",
+          lineHeight: 1.75,
+          marginBottom: "28px",
+          fontSize: "15px",
+        }}>
+          {project.description}
+        </p>
+
+        {project.tags && project.tags.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "36px" }}>
+            {project.tags.map(tag => (
+              <span
+                key={tag}
+                style={{
+                  fontSize: "12px",
+                  padding: "4px 12px",
+                  borderRadius: "100px",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "#a1a1aa",
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {project.url && (
+          <a
+            href={project.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "var(--accent)",
+              color: "#fff",
+              textDecoration: "none",
+              padding: "12px 24px",
+              borderRadius: "100px",
+              fontWeight: 600,
+              fontSize: "14px",
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+          >
+            Voir le projet
+            <ExternalLink size={14} />
+          </a>
+        )}
+      </motion.div>
+    </>
+  )
+}
+
+export default function ProjectsSection({ projects }: { projects: Project[] }) {
+  const [filter, setFilter] = useState("Tous")
+  const [selected, setSelected] = useState<Project | null>(null)
+
+  const filtered =
+    filter === "Tous"
+      ? projects
+      : projects.filter(p => p.category === filter)
+
+  return (
+    <section id="projects" style={{ padding: "120px 24px" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            flexWrap: "wrap",
+            gap: "24px",
+            marginBottom: "48px",
+          }}
+        >
+          <div>
+            <p style={{
+              color: "var(--accent)",
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              marginBottom: "14px",
+            }}>
+              Réalisations
+            </p>
+            <h2 style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(32px, 5vw, 52px)",
+              fontWeight: 800,
+              letterSpacing: "-0.03em",
+              color: "var(--text)",
+              lineHeight: 1.05,
+            }}>
+              Mes <span style={{ color: "var(--accent)" }}>Projets</span>
+            </h2>
+          </div>
+
+          <CategoryFilter active={filter} onChange={setFilter} />
+        </motion.div>
+
+        {/* Grid */}
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            layout
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+              gap: "14px",
+            }}
+          >
+            {filtered.length === 0 && (
+              <motion.p
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                style={{
+                  color: "#3f3f46",
+                  gridColumn: "1 / -1",
+                  textAlign: "center",
+                  padding: "80px 0",
+                  fontSize: "15px",
+                }}
+              >
+                Aucun projet dans cette catégorie pour l'instant.
+              </motion.p>
+            )}
+
+            {filtered.map((project, i) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                index={i}
+                onClick={() => setSelected(project)}
+              />
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {selected && (
+          <ProjectModal project={selected} onClose={() => setSelected(null)} />
+        )}
+      </AnimatePresence>
+    </section>
+  )
 }
 </file>
 
@@ -349,67 +561,981 @@ This version has breaking changes — APIs, conventions, and file structure may 
 <!-- END:nextjs-agent-rules -->
 </file>
 
+<file path="app/about/page.tsx">
+// app/about/page.tsx
+export default function About() {
+  return (
+    <main className="p-10 max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">À propos de moi</h1>
+      <p>
+        Je suis Cédric, consultant IT passionné par le développement web et l'exploration de nouvelles technologies.
+        J'aime créer des applications complètes en Next.js et React, avec un focus sur la qualité et la performance.
+      </p>
+    </main>
+  );
+}
+</file>
+
+<file path="app/components/ContactForm.tsx">
+"use client"
+
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Send, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
+import { supabase } from "@/lib/supabase"
+
+type Status = "idle" | "loading" | "success" | "error"
+
+const inputBase: React.CSSProperties = {
+  width: "100%",
+  padding: "14px 18px",
+  borderRadius: "12px",
+  background: "rgba(255,255,255,0.03)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  color: "var(--text)",
+  fontSize: "15px",
+  outline: "none",
+  transition: "border-color 0.2s, background 0.2s",
+  fontFamily: "inherit",
+  lineHeight: 1.5,
+}
+
+export default function ContactForm() {
+  const [name,    setName]    = useState("")
+  const [email,   setEmail]   = useState("")
+  const [message, setMessage] = useState("")
+  const [status,  setStatus]  = useState<Status>("idle")
+
+  async function handleSubmit() {
+    if (!name.trim() || !email.trim() || !message.trim()) return
+    setStatus("loading")
+
+    const { error } = await supabase
+      .from("messages")
+      .insert({ name: name.trim(), email: email.trim(), message: message.trim() })
+
+    if (error) {
+      console.error(error)
+      setStatus("error")
+    } else {
+      setStatus("success")
+      setName("")
+      setEmail("")
+      setMessage("")
+    }
+
+    setTimeout(() => setStatus("idle"), 6000)
+  }
+
+  const isLoading = status === "loading"
+
+  function focusStyle(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    e.target.style.borderColor = "rgba(129,140,248,0.5)"
+    e.target.style.background = "rgba(129,140,248,0.04)"
+  }
+  function blurStyle(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    e.target.style.borderColor = "rgba(255,255,255,0.08)"
+    e.target.style.background = "rgba(255,255,255,0.03)"
+  }
+
+  return (
+    <section id="contact" style={{ padding: "120px 24px 160px" }}>
+      <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          style={{ textAlign: "center", marginBottom: "56px" }}
+        >
+          <p style={{
+            color: "var(--accent)",
+            fontSize: "12px",
+            fontWeight: 600,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            marginBottom: "14px",
+          }}>
+            Contact
+          </p>
+          <h2 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(32px, 5vw, 52px)",
+            fontWeight: 800,
+            letterSpacing: "-0.03em",
+            color: "var(--text)",
+            lineHeight: 1.05,
+            marginBottom: "16px",
+          }}>
+            Travaillons{" "}
+            <span style={{ color: "var(--accent)" }}>ensemble</span>
+          </h2>
+          <p style={{ color: "var(--muted)", fontSize: "16px", lineHeight: 1.6 }}>
+            Disponible pour un stage dès septembre 2026. N'hésitez pas à me
+            contacter pour discuter de vos projets.
+          </p>
+        </motion.div>
+
+        {/* Form */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          style={{
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid var(--border)",
+            borderRadius: "24px",
+            padding: "40px",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {/* Name + Email row */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <input
+                style={inputBase}
+                placeholder="Nom"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                onFocus={focusStyle}
+                onBlur={blurStyle}
+                disabled={isLoading}
+              />
+              <input
+                style={inputBase}
+                placeholder="Email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                onFocus={focusStyle}
+                onBlur={blurStyle}
+                disabled={isLoading}
+              />
+            </div>
+
+            <textarea
+              style={{ ...inputBase, minHeight: "160px", resize: "vertical" }}
+              placeholder="Votre message..."
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              onFocus={focusStyle as any}
+              onBlur={blurStyle as any}
+              disabled={isLoading}
+            />
+
+            {/* Status banner */}
+            <AnimatePresence>
+              {status === "success" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "14px 18px",
+                    borderRadius: "12px",
+                    background: "rgba(52,211,153,0.08)",
+                    border: "1px solid rgba(52,211,153,0.2)",
+                    color: "#34d399",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    overflow: "hidden",
+                  }}
+                >
+                  <CheckCircle2 size={16} />
+                  Message envoyé avec succès ! Je vous répondrai rapidement.
+                </motion.div>
+              )}
+
+              {status === "error" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "14px 18px",
+                    borderRadius: "12px",
+                    background: "rgba(248,113,113,0.08)",
+                    border: "1px solid rgba(248,113,113,0.2)",
+                    color: "#f87171",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    overflow: "hidden",
+                  }}
+                >
+                  <AlertCircle size={16} />
+                  Une erreur est survenue. Veuillez réessayer.
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Submit button */}
+            <button
+              onClick={handleSubmit}
+              disabled={isLoading || !name || !email || !message}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                background:
+                  !name || !email || !message ? "rgba(129,140,248,0.4)" : "var(--accent)",
+                color: "#fff",
+                border: "none",
+                padding: "15px 28px",
+                borderRadius: "100px",
+                fontWeight: 600,
+                fontSize: "15px",
+                cursor: !name || !email || !message || isLoading ? "not-allowed" : "pointer",
+                transition: "opacity 0.2s, transform 0.2s",
+                fontFamily: "inherit",
+                alignSelf: "flex-end",
+              }}
+              onMouseEnter={e => {
+                if (!isLoading && name && email && message)
+                  e.currentTarget.style.transform = "translateY(-2px)"
+              }}
+              onMouseLeave={e => (e.currentTarget.style.transform = "translateY(0)")}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
+                  Envoi en cours...
+                  <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+                </>
+              ) : (
+                <>
+                  <Send size={15} />
+                  Envoyer le message
+                </>
+              )}
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+</file>
+
+<file path="app/components/Hero.tsx">
+"use client"
+
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Github, Linkedin, ArrowDown } from "lucide-react"
+
+const ROLES = [
+  "Développeur Full Stack",
+  "Expert Gestion de Projet IT",
+  "Auditeur Sécurité SI",
+  "Consultant Digital",
+]
+
+export default function Hero() {
+  const [roleIndex, setRoleIndex] = useState(0)
+
+  useEffect(() => {
+    const t = setInterval(
+      () => setRoleIndex(i => (i + 1) % ROLES.length),
+      3500
+    )
+    return () => clearInterval(t)
+  }, [])
+
+  return (
+    <section
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "120px 24px 100px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Gradient orbs */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: "15%",
+          left: "-5%",
+          width: "700px",
+          height: "700px",
+          background:
+            "radial-gradient(circle, rgba(129,140,248,0.13) 0%, transparent 65%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          bottom: "10%",
+          right: "-5%",
+          width: "500px",
+          height: "500px",
+          background:
+            "radial-gradient(circle, rgba(52,211,153,0.07) 0%, transparent 65%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Content */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          textAlign: "center",
+          position: "relative",
+          zIndex: 1,
+          maxWidth: "960px",
+          width: "100%",
+        }}
+      >
+        {/* Availability badge */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            background: "rgba(52,211,153,0.08)",
+            border: "1px solid rgba(52,211,153,0.2)",
+            borderRadius: "100px",
+            padding: "7px 18px",
+            marginBottom: "36px",
+          }}
+        >
+          <span
+            style={{
+              width: "7px",
+              height: "7px",
+              borderRadius: "50%",
+              background: "var(--emerald)",
+              display: "inline-block",
+              animation: "pulse-dot 2s ease-in-out infinite",
+            }}
+          />
+          <span style={{ fontSize: "13px", color: "var(--emerald)", fontWeight: 500 }}>
+            Disponible — Septembre 2026
+          </span>
+        </motion.div>
+
+        {/* Name */}
+        <h1
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(54px, 11vw, 120px)",
+            fontWeight: 800,
+            lineHeight: 0.92,
+            letterSpacing: "-0.04em",
+            marginBottom: "28px",
+            color: "var(--text)",
+          }}
+        >
+          Cédric{" "}
+          <span
+            style={{
+              background:
+                "linear-gradient(135deg, #818cf8 20%, #a78bfa 50%, #c084fc 80%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Pascal
+          </span>
+        </h1>
+
+        {/* Animated role */}
+        <div
+          style={{
+            height: "44px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: "44px",
+            overflow: "hidden",
+          }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={roleIndex}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              style={{
+                fontSize: "clamp(17px, 3vw, 26px)",
+                color: "var(--muted)",
+                fontWeight: 300,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {ROLES[roleIndex]}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+
+        {/* Tagline */}
+        <p
+          style={{
+            color: "#52525b",
+            fontSize: "16px",
+            maxWidth: "500px",
+            margin: "0 auto 52px",
+            lineHeight: 1.75,
+          }}
+        >
+          Étudiant en Master MIAGE, passionné par la création d'applications
+          web modernes alliant performance technique et impact métier.
+        </p>
+
+        {/* CTA Row */}
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            justifyContent: "center",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <a
+            href="#projects"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "var(--accent)",
+              color: "#fff",
+              textDecoration: "none",
+              padding: "14px 28px",
+              borderRadius: "100px",
+              fontWeight: 600,
+              fontSize: "15px",
+              boxShadow: "0 0 40px rgba(129,140,248,0.25)",
+              transition: "transform 0.2s, box-shadow 0.2s",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = "translateY(-2px)"
+              e.currentTarget.style.boxShadow =
+                "0 8px 48px rgba(129,140,248,0.4)"
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = "translateY(0)"
+              e.currentTarget.style.boxShadow =
+                "0 0 40px rgba(129,140,248,0.25)"
+            }}
+          >
+            Voir mes projets
+          </a>
+
+          <a
+            href="#contact"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "var(--text)",
+              textDecoration: "none",
+              padding: "14px 28px",
+              borderRadius: "100px",
+              fontWeight: 500,
+              fontSize: "15px",
+              transition: "background 0.2s",
+            }}
+            onMouseEnter={e =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.09)")
+            }
+            onMouseLeave={e =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+            }
+          >
+            Me contacter
+          </a>
+
+          {/* Social icons */}
+          <div style={{ display: "flex", gap: "8px", marginLeft: "4px" }}>
+            {[
+              { href: "#", Icon: Github,   label: "GitHub" },
+              { href: "#", Icon: Linkedin, label: "LinkedIn" },
+            ].map(({ href, Icon, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                style={{
+                  width: "46px",
+                  height: "46px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "var(--muted)",
+                  transition: "color 0.2s, border-color 0.2s, transform 0.2s",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = "var(--text)"
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"
+                  e.currentTarget.style.transform = "translateY(-2px)"
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = "var(--muted)"
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"
+                  e.currentTarget.style.transform = "translateY(0)"
+                }}
+              >
+                <Icon size={18} />
+              </a>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Scroll hint */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.4 }}
+        style={{
+          position: "absolute",
+          bottom: "40px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "6px",
+          color: "#3f3f46",
+        }}
+      >
+        <span style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+          Scroll
+        </span>
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+        >
+          <ArrowDown size={15} />
+        </motion.div>
+      </motion.div>
+    </section>
+  )
+}
+</file>
+
+<file path="app/components/Navbar.tsx">
+// app/components/Navbar.tsx
+"use client"
+
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { Download } from "lucide-react"
+
+const NAV_LINKS = [
+  { label: "Compétences", href: "#skills" },
+  { label: "Projets",     href: "#projects" },
+  { label: "Contact",     href: "#contact" },
+]
+
+export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 30)
+    window.addEventListener("scroll", handler, { passive: true })
+    return () => window.removeEventListener("scroll", handler)
+  }, [])
+
+  return (
+    <header
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        padding: scrolled ? "10px 24px" : "20px 24px",
+        transition: "padding 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        pointerEvents: "none",
+      }}
+    >
+      <nav
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          background: scrolled ? "rgba(9, 9, 11, 0.85)" : "transparent",
+          backdropFilter: scrolled ? "blur(20px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(20px)" : "none",
+          border: scrolled ? "1px solid rgba(255,255,255,0.08)" : "none",
+          borderRadius: "100px",
+          padding: scrolled ? "10px 20px 10px 24px" : "0",
+          transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          pointerEvents: "auto",
+        }}
+      >
+        {/* Logo */}
+        <Link
+          href="/"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "17px",
+            fontWeight: 800,
+            color: "var(--text)",
+            textDecoration: "none",
+            letterSpacing: "-0.03em",
+          }}
+        >
+          CP<span style={{ color: "var(--accent)" }}>.</span>
+        </Link>
+
+        {/* Links */}
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          {NAV_LINKS.map(({ label, href }) => (
+            <a
+              key={href}
+              href={href}
+              style={{
+                color: "var(--muted)",
+                textDecoration: "none",
+                fontSize: "14px",
+                padding: "7px 14px",
+                borderRadius: "100px",
+                transition: "color 0.2s, background 0.2s",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = "var(--text)"
+                e.currentTarget.style.background = "rgba(255,255,255,0.06)"
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = "var(--muted)"
+                e.currentTarget.style.background = "transparent"
+              }}
+            >
+              {label}
+            </a>
+          ))}
+
+          <a
+            href="/cv.pdf"
+            download
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              marginLeft: "8px",
+              background: "var(--accent)",
+              color: "#fff",
+              textDecoration: "none",
+              fontSize: "13px",
+              fontWeight: 600,
+              padding: "8px 16px",
+              borderRadius: "100px",
+              transition: "opacity 0.2s, transform 0.2s",
+              whiteSpace: "nowrap",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.opacity = "0.85"
+              e.currentTarget.style.transform = "translateY(-1px)"
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.opacity = "1"
+              e.currentTarget.style.transform = "translateY(0)"
+            }}
+          >
+            <Download size={13} />
+            CV
+          </a>
+        </div>
+      </nav>
+    </header>
+  )
+}
+</file>
+
+<file path="app/components/Skills.tsx">
+"use client"
+
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
+
+interface Skill {
+  name: string
+  level: number
+  category: string
+  color: string
+}
+
+const SKILLS: Skill[] = [
+  { name: "Gestion de Projet IT",   level: 95, category: "Management",    color: "#818cf8" },
+  { name: "Audit & Gouvernance SI", level: 90, category: "Sécurité",      color: "#818cf8" },
+  { name: "Java / Spring Boot",     level: 66, category: "Backend",       color: "#34d399" },
+  { name: "SQL / Supabase",         level: 60, category: "Base de données",color: "#34d399" },
+  { name: "JavaScript / React",     level: 50, category: "Frontend",      color: "#f472b6" },
+  { name: "Next.js / Tailwind",     level: 45, category: "Frontend",      color: "#f472b6" },
+]
+
+function SkillCard({ skill, delay, inView }: { skill: Skill; delay: number; inView: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -2 }}
+      style={{
+        padding: "24px 26px",
+        borderRadius: "16px",
+        background: "var(--bg-card)",
+        border: "1px solid var(--border)",
+        cursor: "default",
+        transition: "border-color 0.25s, background 0.25s",
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = `${skill.color}40`
+        e.currentTarget.style.background = `${skill.color}06`
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = "var(--border)"
+        e.currentTarget.style.background = "var(--bg-card)"
+      }}
+    >
+      {/* Top row */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px" }}>
+        <div>
+          <p style={{ fontWeight: 600, color: "var(--text)", fontSize: "15px", marginBottom: "8px" }}>
+            {skill.name}
+          </p>
+          <span style={{
+            fontSize: "11px",
+            padding: "3px 10px",
+            borderRadius: "100px",
+            background: `${skill.color}14`,
+            color: skill.color,
+            border: `1px solid ${skill.color}30`,
+            fontWeight: 500,
+            letterSpacing: "0.02em",
+          }}>
+            {skill.category}
+          </span>
+        </div>
+        <span style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "36px",
+          fontWeight: 800,
+          letterSpacing: "-0.04em",
+          color: "#1c1c1f",
+          lineHeight: 1,
+        }}>
+          {skill.level}
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ height: "3px", background: "rgba(255,255,255,0.05)", borderRadius: "2px", overflow: "hidden" }}>
+        <motion.div
+          initial={{ width: 0 }}
+          animate={inView ? { width: `${skill.level}%` } : { width: 0 }}
+          transition={{ duration: 1.3, delay: delay + 0.2, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            height: "100%",
+            background: `linear-gradient(90deg, ${skill.color}60, ${skill.color})`,
+            borderRadius: "2px",
+          }}
+        />
+      </div>
+    </motion.div>
+  )
+}
+
+export default function Skills() {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-80px" })
+
+  return (
+    <section id="skills" style={{ padding: "120px 24px" }}>
+      <div ref={ref} style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          style={{ marginBottom: "64px" }}
+        >
+          <p style={{
+            color: "var(--accent)",
+            fontSize: "12px",
+            fontWeight: 600,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            marginBottom: "14px",
+          }}>
+            Savoir-faire
+          </p>
+          <h2 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(32px, 5vw, 52px)",
+            fontWeight: 800,
+            letterSpacing: "-0.03em",
+            color: "var(--text)",
+            lineHeight: 1.05,
+          }}>
+            Compétences &{" "}
+            <span style={{ color: "var(--accent)" }}>Maîtrise</span>
+          </h2>
+        </motion.div>
+
+        {/* Grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "14px",
+        }}>
+          {SKILLS.map((skill, i) => (
+            <SkillCard key={skill.name} skill={skill} delay={i * 0.07} inView={inView} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+</file>
+
 <file path="app/globals.css">
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --accent: #818cf8;
+  --accent-glow: rgba(129, 140, 248, 0.2);
+  --emerald: #34d399;
+  --pink: #f472b6;
+  --bg: #09090b;
+  --bg-card: rgba(255, 255, 255, 0.025);
+  --border: rgba(255, 255, 255, 0.07);
+  --text: #fafafa;
+  --muted: #71717a;
+  --font-display: var(--font-syne), sans-serif;
+  --font-body: var(--font-dm-sans), sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+html { scroll-behavior: smooth; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Dot grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+/* Pulse animation for badge */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--emerald); }
+  50%       { opacity: 0.5; box-shadow: 0 0 4px var(--emerald); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
 }
 </file>
 
-<file path="app/layout.tsx">
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Navbar from "./components/Navbar"; // <-- ajoute cette ligne
+<file path="app/projects/[id]/page.tsx">
+import { supabase } from "@/lib/supabase"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+export default async function ProjectPage({params}:{params:{id:string}}){
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  const { data } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id",params.id)
+    .single()
 
-export const metadata: Metadata = {
-  title: "Cédric Portfolio",
-  description: "Generated by create next app",
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <Navbar /> {/* <-- ajoute cette ligne ici */}
-        {children} {/* le contenu de chaque page s'affichera ici */}
-      </body>
-    </html>
+
+    <main className="p-20">
+
+      <h1 className="text-4xl font-bold mb-6">
+        {data.title}
+      </h1>
+
+      <p>
+        {data.description}
+      </p>
+
+      <a
+        href={data.url}
+        className="text-blue-600"
+      >
+        Voir le projet
+      </a>
+
+    </main>
+
+  )
+}
+</file>
+
+<file path="app/projects/page.tsx">
+// app/projects/page.tsx
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+
+export default async function ProjectsPage() {
+  const { data: projects } = await supabase.from("projects").select("*");
+  return (
+    <main className="p-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+      {projects?.map((project) => (
+        <Link key={project.id} href={`/projects/${project.id}`} className="border p-4 rounded hover:shadow-lg">
+          <h2 className="text-xl font-bold">{project.title}</h2>
+          <p className="text-gray-600">{project.description}</p>
+        </Link>
+      ))}
+    </main>
   );
 }
 </file>
@@ -910,6 +2036,58 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 }
 </file>
 
+<file path="app/layout.tsx">
+import type { Metadata } from "next"
+import { Syne, DM_Sans } from "next/font/google"
+import "./globals.css"
+import Navbar from "./components/Navbar"
+
+const syne = Syne({
+  subsets: ["latin"],
+  variable: "--font-syne",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+})
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  display: "swap",
+})
+
+export const metadata: Metadata = {
+  title: "Cédric Pascal — Portfolio",
+  description:
+    "Consultant IT & Développeur Full Stack.",
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="fr" className={`${syne.variable} ${dmSans.variable}`}>
+      <body>
+        <Navbar />
+        <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+      </body>
+    </html>
+  )
+}
+</file>
+
+<file path="lib/supabase.ts">
+import { createClient } from '@supabase/supabase-js';
+
+// On récupère les clés depuis le fichier .env.local de manière sécurisée
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+// Création et exportation du client
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+</file>
+
 <file path="package.json">
 {
   "name": "cedric-portfolio",
@@ -923,6 +2101,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.101.1",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.7.0",
     "next": "16.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -941,120 +2121,50 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 </file>
 
 <file path="app/page.tsx">
-"use client"
-
-import { useState } from "react"
 import { supabase } from "@/lib/supabase"
+import Hero from "./components/Hero"
+import Skills from "./components/Skills"
+import ProjectsSection from "./components/ProjectsSection"
+import ContactForm from "./components/ContactForm"
 
 async function getProjects() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("projects")
     .select("*")
+    .order("created_at", { ascending: false })
 
+  if (error) console.error("Supabase error:", error.message)
   return data ?? []
 }
 
 export default async function Home() {
-
   const projects = await getProjects()
 
   return (
-    <main className="min-h-screen bg-zinc-50 text-zinc-900 p-12">
+    <main>
+      <Hero />
+      <Skills />
+      <ProjectsSection projects={projects} />
+      <ContactForm />
 
-      <h1 className="text-4xl font-bold mb-12">
-        Cédric — Portfolio
-      </h1>
-
-      <h2 className="text-2xl font-semibold mb-6">
-        Projets
-      </h2>
-
-      <div className="grid gap-6 md:grid-cols-2">
-
-        {projects.map((project: any) => (
-          <div
-            key={project.id}
-            className="p-6 border rounded-lg bg-white"
-          >
-            <h3 className="text-xl font-semibold mb-2">
-              {project.title}
-            </h3>
-
-            <p className="text-zinc-600 mb-3">
-              {project.description}
-            </p>
-
-            <a
-              href={project.url}
-              className="text-blue-600"
-            >
-              Voir le projet
-            </a>
-
-          </div>
-        ))}
-
-      </div>
-
-    </main>
-  )
-}
-
-
-export function ContactForm() {
-
-  const [name,setName] = useState("")
-  const [email,setEmail] = useState("")
-  const [message,setMessage] = useState("")
-
-  async function sendMessage() {
-
-    await supabase
-      .from("messages")
-      .insert({
-        name,
-        email,
-        message
-      })
-
-    alert("Message envoyé")
-  }
-
-  return (
-
-    <div className="mt-20">
-
-      <h2 className="text-2xl font-bold mb-6">
-        Contact
-      </h2>
-
-      <input
-        className="border p-3 w-full mb-3"
-        placeholder="Nom"
-        onChange={(e)=>setName(e.target.value)}
-      />
-
-      <input
-        className="border p-3 w-full mb-3"
-        placeholder="Email"
-        onChange={(e)=>setEmail(e.target.value)}
-      />
-
-      <textarea
-        className="border p-3 w-full mb-3"
-        placeholder="Message"
-        onChange={(e)=>setMessage(e.target.value)}
-      />
-
-      <button
-        onClick={sendMessage}
-        className="bg-black text-white px-6 py-3 rounded"
+      {/* Footer */}
+      <footer
+        style={{
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          padding: "32px 24px",
+          textAlign: "center",
+          color: "var(--muted)",
+          fontSize: "13px",
+        }}
       >
-        Envoyer
-      </button>
-
-    </div>
-
+        <p>
+          © {new Date().getFullYear()} Cédric Pascal — Conçu & développé avec{" "}
+          <span style={{ color: "var(--accent)" }}>Next.js</span>,{" "}
+          <span style={{ color: "var(--accent)" }}>Supabase</span> &{" "}
+          <span style={{ color: "var(--accent)" }}>Vercel</span>
+        </p>
+      </footer>
+    </main>
   )
 }
 </file>

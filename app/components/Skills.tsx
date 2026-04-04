@@ -1,45 +1,144 @@
-"use client";
-import { motion } from "framer-motion";
-import { Cpu, Code2, Smartphone, Briefcase, ShieldCheck, Database } from "lucide-react";
+"use client"
+
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
 
 interface Skill {
-  name: string;
-  level: number;
-  icon: any;
-  category: string;
+  name: string
+  level: number
+  category: string
+  color: string
 }
 
 const SKILLS: Skill[] = [
-  { name: 'Java / Spring Boot', level: 66, icon: Cpu, category: 'Tech' },
-  { name: 'JavaScript / React', level: 50, icon: Code2, category: 'Tech' },
-  { name: 'Next.js / Tailwind', level: 45, icon: Smartphone, category: 'Tech' },
-  { name: 'Gestion de Projet IT', level: 95, icon: Briefcase, category: 'Management' },
-  { name: 'Audit & Gouvernance SI', level: 90, icon: ShieldCheck, category: 'Security' },
-  { name: 'SQL / Supabase', level: 60, icon: Database, category: 'Tech' },
-];
+  { name: "Gestion de Projet IT",   level: 95, category: "Management",    color: "#818cf8" },
+  { name: "Audit & Gouvernance SI", level: 90, category: "Sécurité",      color: "#818cf8" },
+  { name: "Java / Spring Boot",     level: 66, category: "Backend",       color: "#34d399" },
+  { name: "SQL / Supabase",         level: 60, category: "Base de données",color: "#34d399" },
+  { name: "JavaScript / React",     level: 50, category: "Frontend",      color: "#f472b6" },
+  { name: "Next.js / Tailwind",     level: 45, category: "Frontend",      color: "#f472b6" },
+]
+
+function SkillCard({ skill, delay, inView }: { skill: Skill; delay: number; inView: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -2 }}
+      style={{
+        padding: "24px 26px",
+        borderRadius: "16px",
+        background: "var(--bg-card)",
+        border: "1px solid var(--border)",
+        cursor: "default",
+        transition: "border-color 0.25s, background 0.25s",
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = `${skill.color}40`
+        e.currentTarget.style.background = `${skill.color}06`
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = "var(--border)"
+        e.currentTarget.style.background = "var(--bg-card)"
+      }}
+    >
+      {/* Top row */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px" }}>
+        <div>
+          <p style={{ fontWeight: 600, color: "var(--text)", fontSize: "15px", marginBottom: "8px" }}>
+            {skill.name}
+          </p>
+          <span style={{
+            fontSize: "11px",
+            padding: "3px 10px",
+            borderRadius: "100px",
+            background: `${skill.color}14`,
+            color: skill.color,
+            border: `1px solid ${skill.color}30`,
+            fontWeight: 500,
+            letterSpacing: "0.02em",
+          }}>
+            {skill.category}
+          </span>
+        </div>
+        <span style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "36px",
+          fontWeight: 800,
+          letterSpacing: "-0.04em",
+          color: "#1c1c1f",
+          lineHeight: 1,
+        }}>
+          {skill.level}
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ height: "3px", background: "rgba(255,255,255,0.05)", borderRadius: "2px", overflow: "hidden" }}>
+        <motion.div
+          initial={{ width: 0 }}
+          animate={inView ? { width: `${skill.level}%` } : { width: 0 }}
+          transition={{ duration: 1.3, delay: delay + 0.2, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            height: "100%",
+            background: `linear-gradient(90deg, ${skill.color}60, ${skill.color})`,
+            borderRadius: "2px",
+          }}
+        />
+      </div>
+    </motion.div>
+  )
+}
 
 export default function Skills() {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-80px" })
+
   return (
-    <section className="py-24 bg-zinc-900/30">
-      <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-4xl font-bold mb-16 text-center">Compétences & <span className="text-purple-400">Maîtrise</span></h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {SKILLS.map(skill => (
-            <div key={skill.name} className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 hover:border-purple-500/50 transition-colors group">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 rounded-lg bg-purple-500/10 text-purple-400 group-hover:scale-110 transition-transform">
-                  <skill.icon className="w-6 h-6" />
-                </div>
-                <span className="font-semibold">{skill.name}</span>
-              </div>
-              <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-                <motion.div initial={{ width: 0 }} whileInView={{ width: `${skill.level}%` }} transition={{ duration: 1, ease: "easeOut" }} className="h-full bg-gradient-to-r from-purple-500 to-blue-500" />
-              </div>
-              <div className="mt-2 text-right text-xs text-zinc-500 font-mono">{skill.level}%</div>
-            </div>
+    <section id="skills" style={{ padding: "120px 24px" }}>
+      <div ref={ref} style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          style={{ marginBottom: "64px" }}
+        >
+          <p style={{
+            color: "var(--accent)",
+            fontSize: "12px",
+            fontWeight: 600,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            marginBottom: "14px",
+          }}>
+            Savoir-faire
+          </p>
+          <h2 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(32px, 5vw, 52px)",
+            fontWeight: 800,
+            letterSpacing: "-0.03em",
+            color: "var(--text)",
+            lineHeight: 1.05,
+          }}>
+            Compétences &{" "}
+            <span style={{ color: "var(--accent)" }}>Maîtrise</span>
+          </h2>
+        </motion.div>
+
+        {/* Grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "14px",
+        }}>
+          {SKILLS.map((skill, i) => (
+            <SkillCard key={skill.name} skill={skill} delay={i * 0.07} inView={inView} />
           ))}
         </div>
       </div>
     </section>
-  );
+  )
 }
