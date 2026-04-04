@@ -2,8 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ExternalLink, ArrowRight, X } from "lucide-react"
-import Link from "next/link"
+import { ExternalLink, X } from "lucide-react"
 
 interface Project {
   id: string
@@ -283,35 +282,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
             </a>
           )}
 
-          {/* Link to full detail page */}
-          <Link
-            href={`/projects/${project.id}`}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              background: "var(--bg-card)",
-              border: "1px solid var(--border)",
-              color: "var(--text)",
-              textDecoration: "none",
-              padding: "12px 24px",
-              borderRadius: "100px",
-              fontWeight: 500,
-              fontSize: "14px",
-              transition: "background 0.2s, border-color 0.2s",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "var(--accent-glow)"
-              e.currentTarget.style.borderColor = "var(--accent)"
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "var(--bg-card)"
-              e.currentTarget.style.borderColor = "var(--border)"
-            }}
-          >
-            Page détail
-            <ArrowRight size={14} />
-          </Link>
+
         </div>
       </motion.div>
     </>
