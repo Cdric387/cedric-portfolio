@@ -4,6 +4,9 @@ import Skills from "./components/Skills"
 import ProjectsSection from "./components/ProjectsSection"
 import ContactForm from "./components/ContactForm"
 
+// Force le rendu côté serveur à chaque requête (pas de cache statique)
+export const dynamic = "force-dynamic"
+
 async function getProjects() {
   const { data, error } = await supabase
     .from("projects")
