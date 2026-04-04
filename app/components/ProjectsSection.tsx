@@ -59,7 +59,7 @@ function ProjectCard({ project, index, onClick }: { project: Project; index: num
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.28, delay: index * 0.05 }}
-      whileHover={{ y: -4, borderColor: "rgba(129,140,248,0.35)" } as object}
+      whileHover={{ y: -4 }}
       onClick={onClick}
       style={{
         padding: "28px",
