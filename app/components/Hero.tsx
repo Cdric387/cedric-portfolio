@@ -259,7 +259,7 @@ export default function Hero() {
           </a>
 
           {/* ← Bouton vidéo avec question secrète */}
-          <VideoModal src="/presentation.mp4" label="Construction de ce portfolio" />
+          <VideoModal label="Construction de ce portfolio" />
 
           {/* Social icons */}
           <div style={{ display: "flex", gap: "8px", marginLeft: "4px" }}>
