@@ -5,15 +5,15 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, Play, Lock, AlertCircle } from "lucide-react"
 
 const SECRET_ANSWER = "livet"
+const YOUTUBE_ID = "nvmYDWD8L4g"
 
 type Step = "idle" | "question" | "wrong" | "video"
 
 interface VideoModalProps {
-  src: string
   label?: string
 }
 
-export default function VideoModal({ src, label = "Voir ma présentation vidéo" }: VideoModalProps) {
+export default function VideoModal({ label = "Voir ma présentation vidéo" }: VideoModalProps) {
   const [step, setStep] = useState<Step>("idle")
   const [input, setInput] = useState("")
 
@@ -83,7 +83,7 @@ export default function VideoModal({ src, label = "Voir ma présentation vidéo"
 
       {/* ── Backdrop ── */}
       <AnimatePresence>
-        {step !== "idle" && (
+        {(step === "question" || step === "wrong") && (
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -257,11 +257,13 @@ export default function VideoModal({ src, label = "Voir ma présentation vidéo"
         )}
       </AnimatePresence>
 
-      {/* ── Video modal ── */}
+      {/* ── Video modal (YouTube) ── */}
       <AnimatePresence>
         {step === "video" && (
           <motion.div
             key="video"
+            drag
+            dragMomentum={false}
             initial={{ opacity: 0, scale: 0.92, y: 32 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 32 }}
@@ -276,6 +278,7 @@ export default function VideoModal({ src, label = "Voir ma présentation vidéo"
               overflow: "hidden",
               background: "#000",
               boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)",
+              cursor: "grab",
             }}
           >
             <button
@@ -296,14 +299,14 @@ export default function VideoModal({ src, label = "Voir ma présentation vidéo"
             </button>
 
             <div style={{ position: "relative", paddingTop: "56.25%" }}>
-              <video
-                src={src}
-                controls
-                autoPlay
+              <iframe
+                src={`https://www.youtube.com/embed/${YOUTUBE_ID}?autoplay=1&rel=0`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
                 style={{
                   position: "absolute", inset: 0,
                   width: "100%", height: "100%",
-                  objectFit: "contain", background: "#000",
+                  border: "none",
                 }}
               />
             </div>
